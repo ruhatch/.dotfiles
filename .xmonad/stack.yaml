@@ -1,0 +1,12 @@
+resolver: lts-7.19
+
+packages:
+  - .
+
+extra-deps:
+  - X11-1.8
+  - X11-xft-0.3.1
+  - directory-1.2.7.1
+  - xmobar-0.24.3
+  - xmonad-0.13
+  - xmonad-contrib-0.13
