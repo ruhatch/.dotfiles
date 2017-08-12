@@ -349,15 +349,15 @@ myMouseBindings XConfig {XMonad.modMask = modMask} = M.fromList
 -- per-workspace layout choices.
 
 myStartupHook = --spawn "source ~/.fehbg"
-            spawn "compton --backend glx -fcCz -l -17 -t -17" --shadow-red 0.35 --shadow-green 0.92 --shadow-blue 0.93" --f
+            spawn "compton --backend glx --vsync opengl -fcCz -l -17 -t -17" --shadow-red 0.35 --shadow-green 0.92 --shadow-blue 0.93" --f
             --spawn "compton --backend glx -f" --f
             <+> setDefaultCursor xC_left_ptr
             <+> spawn "hsetroot -solid '#F5F6F7'"
             <+> spawn "xinput --set-prop 13 290 1"
             <+> spawn "xinput --set-prop 13 302 0"
             <+> spawn "~/bin/libinput-gestures"
-            -- <+> spawn "xrandr --output HDMI1 --off"
-            -- <+> spawn "xrandr --output HDMI1 --auto --right-of eDP1"
+            <+> spawn "xrandr --output HDMI1 --off"
+            <+> spawn "xrandr --output HDMI1 --auto --right-of eDP1"
             <+> setWMName "LG3D"
             <+> spawn "firefox"
 
