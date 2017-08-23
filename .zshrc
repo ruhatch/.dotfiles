@@ -83,6 +83,7 @@ alias zshconf="atom ~/.zshrc"
 alias yi="stack exec yi --package yi"
 #alias atom="stack exec -- atom"
 alias xconf="atom ~/.xmonad/xmonad.hs"
+alias emacs="emacsclient -c"
 
 # OPAM configuration
 . /home/rupert/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true

@@ -1,8 +1,8 @@
-#!/bin/zsh
+#!/bin/sh
 
 BIN=$1
 [[ -n $BIN ]] || BIN=xmonad
 
 stack install --local-bin-path $PWD
 
-[[ -f $BIN ]] || ln -s my-xmonad $BIN
+[[ -e $BIN ]] || ln -s my-xmonad $BIN

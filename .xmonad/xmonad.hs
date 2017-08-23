@@ -79,7 +79,7 @@ myManageHook = manageSpawn
                  isDialog                        --> placeHook (fixed (0.5, 0.5)),
                  className =? "Firefox"          --> doShift (head myWorkspaces),
                  className =? "Atom"             --> doShift (myWorkspaces !! 2),
-                 className =? "Emacs"	           --> doShift (myWorkspaces !! 2),
+                 className =? "Emacs"            --> doShift (myWorkspaces !! 2),
                  className =? "Spotify"          --> doShift (myWorkspaces !! 9),
                  resource  =? "desktop_window"   --> doIgnore,
                  className =? "Gimp"             --> doFloat,
@@ -352,7 +352,7 @@ myStartupHook = --spawn "source ~/.fehbg"
             spawn "compton --backend glx --vsync opengl -fcCz -l -17 -t -17" --shadow-red 0.35 --shadow-green 0.92 --shadow-blue 0.93" --f
             --spawn "compton --backend glx -f" --f
             <+> setDefaultCursor xC_left_ptr
-            <+> spawn "hsetroot -solid '#F5F6F7'"
+            <+> spawn "xsetroot -solid '#F5F6F7'"
             <+> spawn "xinput --set-prop 13 290 1"
             <+> spawn "xinput --set-prop 13 302 0"
             <+> spawn "~/bin/libinput-gestures"
