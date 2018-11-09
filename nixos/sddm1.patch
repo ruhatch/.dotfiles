@@ -1,0 +1,13 @@
+diff --git a/src/greeter/GreeterApp.cpp b/src/greeter/GreeterApp.cpp
+index 5fb70ea..b578257 100644
+--- a/src/greeter/GreeterApp.cpp
++++ b/src/greeter/GreeterApp.cpp
+@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
+ 
+     // HiDPI
+     bool hiDpiEnabled = false;
+-    if (QGuiApplication::platformName() == QLatin1String("xcb"))
++    if (QGuiApplication::platformName() == QLatin1String("xcb") || QGuiApplication::platformName() == QLatin1String(""))
+         hiDpiEnabled = SDDM::mainConfig.X11.EnableHiDPI.get();
+     else if (QGuiApplication::platformName().startsWith(QLatin1String("wayland")))
+         hiDpiEnabled = SDDM::mainConfig.Wayland.EnableHiDPI.get();
