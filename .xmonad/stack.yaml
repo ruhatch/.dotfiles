@@ -6,6 +6,7 @@ packages:
 nix:
   enable: true
   shell-file: shell.nix
+  nix-shell-options: ["--argstr", "compiler", "ghc802"]
 
 # extra-deps:
 #   - X11-1.8

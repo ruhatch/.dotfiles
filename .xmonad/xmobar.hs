@@ -3,7 +3,8 @@
 -- http://github.com/vicfryzel/xmonad-config
 
 Config {
-    font = "xft:SFNS Display:size=11",
+    -- font = "xft:SFNS Display:size=11",
+    font = "xft:Fira Code Retina:size=12",
     additionalFonts = ["xft:FontAwesome:size=11"],
     alpha = 0,
     --bgColor = "#575757",
@@ -22,10 +23,10 @@ Config {
         "--normal"   , "darkorange",
         "--", -- battery specific options
         -- discharging status
-        "-o"	, "<leftipat>  <left>%",
+        "-o"	, "<leftipat> <left>%",
         -- AC "on" status
-        "-O"	, "<leftipat>  <left>%",
-        "-i"	, "<leftipat>  <left>%",
+        "-O"	, "<leftipat> <left>%",
+        "-i"	, "<leftipat> <left>%",
         -- charged status
         --"-i"	, "<fn=1>\xf240</fn>",
         "--off-icon-pattern", "<fn=1>\xf240</fn>",
@@ -35,7 +36,7 @@ Config {
       Run Date "%a %_d %b %H:%M" "date" 10,
       Run UnsafeStdinReader,
       Run Volume "default" "Master" [
-        "-t", "<status>  <volume>%",
+        "-t", "<status> <volume>%",
         "--",
         "-o", "<fn=1>\xf026</fn>",
         "-O", "<fn=1>\xf028</fn>",
@@ -43,11 +44,11 @@ Config {
         "-C", "#2f343f"
       ] 10,
       Run Wireless "wlp2s0" [
-        "-t", "<fn=1>\xf1eb</fn>  <essid>",
+        "-t", "<fn=1>\xf1eb</fn> <essid>",
         "-x", "Not Connected"
       ] 10
     ],
     sepChar = "%",
     alignSep = "}{",
-    template = "  %UnsafeStdinReader% } %date% { %wlp2s0wi%    %default:Master%    %battery%    <action=`oblogout` button=1><fn=1><raw=1:/></fn></action>  "
+    template = " %UnsafeStdinReader% } %date% { %wlp2s0wi%  %default:Master%  %battery%  <action=`oblogout` button=1><fn=1><raw=1:/></fn></action> "
 }

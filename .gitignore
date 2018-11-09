@@ -2,3 +2,4 @@
 *.o
 xmonad-x86*
 *.errors
+*/.stack-work/*

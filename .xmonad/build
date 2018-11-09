@@ -4,5 +4,6 @@ BIN=$1
 [[ -n $BIN ]] || BIN=xmonad
 
 stack install --local-bin-path $PWD
-
-[[ -e $BIN ]] || ln -s my-xmonad $BIN
+rm $BIN
+ln -s my-xmonad $BIN
+# [[ -e $BIN ]] || ln -s my-xmonad $BIN

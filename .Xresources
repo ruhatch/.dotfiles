@@ -9,17 +9,19 @@ URxvt*letterSpace:                      -1
 
 Xft.dpi:	192
 
-Xcursor.theme: breeze_cursors 
-Xcursor.size: 32
+Xcursor*theme: breeze_cursors 
+Xcursor*size: 32
 
 rofi.lines: 3
 rofi.eh: 2
 rofi.width: 50
 rofi.padding: 40
 rofi.bw: 8
-rofi.color-normal: #2f343f,#afb8c5,#2f343f,#2f343f,#9575CD
-rofi.color-active: #2f343f,#9575CD
-rofi.color-window: #2f343f,#2F343F
+! rofi.color-normal: #2f343f,#afb8c5,#2f343f,#2f343f,#9575CD
+rofi.color-normal: #FAFAFA,#546e7a,#FAFAFA,#FAFAFA,#1e88e5
+! rofi.color-active: #2f343f,#9575CD
+rofi.color-active: #FAFAFA,#0000FF
+rofi.color-window: #FAFAFA,#FAFAFA
 rofi.font: Fira Code Retina 28
 rofi.fixed-num-lines: true
 
@@ -63,39 +65,77 @@ rofi.fixed-num-lines: true
 !*.color7:       #dddddd
 !*.color15:      #cccccc
 
+! ! special
+!  *.foreground:   #afb8c5
+!  *.background:   #2f343f
+!  *.cursorColor:  #afb8c5
+
+! ! black
+!  *.color0:       #282a2e
+!  *.color8:       #373b41
+
+! ! red
+!  *.color1:       #cc6666
+!  *.color9:       #cc6666
+
+! ! green
+!  *.color2:       #78d392
+!  *.color10:      #78d392
+
+! ! yellow
+!  *.color3:       #78d3cf
+!  *.color11:      #78d3cf
+
+! ! blue
+!  *.color4:       #788cd3
+!  *.color12:      #788cd3
+
+! ! magenta
+!  *.color5:       #a178d3
+!  *.color13:      #a178d3
+
+! ! cyan
+!  *.color6:       #de9a78
+!  *.color14:      #de9a78
+
+! ! white
+!  *.color7:       #707880
+!  *.color15:      #afb8c5
+
 ! special
- *.foreground:   #afb8c5
- *.background:   #2f343f
- *.cursorColor:  #afb8c5
+*.foreground:   #546e7a
+*.background:   #fafafa
+*.cursorColor:  #546e7a
 
 ! black
- *.color0:       #282a2e
- *.color8:       #373b41
+*.color0:       #282a2e
+*.color8:       #373b41
 
 ! red
- *.color1:       #cc6666
- *.color9:       #cc6666
+*.color1:       #d50000
+*.color9:       #ff1744
 
 ! green
- *.color2:       #78d392
- *.color10:      #78d392
+*.color2:       #66bb6a
+*.color10:      #558b2f
 
 ! yellow
- *.color3:       #78d3cf
- *.color11:      #78d3cf
+*.color3:       #d84315
+*.color11:      #ff5722
 
 ! blue
- *.color4:       #788cd3
- *.color12:      #788cd3
+*.color4:       #42a5f5
+*.color12:      #1e88e5
 
 ! magenta
- *.color5:       #a178d3
- *.color13:      #a178d3
+*.color5:       #7e57c2
+*.color13:      #b388ff
 
 ! cyan
- *.color6:       #de9a78
- *.color14:      #de9a78
+*.color6:       #0097a7
+*.color14:      #00b8d4
 
 ! white
- *.color7:       #707880
- *.color15:      #afb8c5
+*.color7:       #707880
+*.color15:      #c5c8c6
+
