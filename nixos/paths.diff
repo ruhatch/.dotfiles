@@ -1,0 +1,45 @@
+diff --git a/libinput-gestures b/libinput-gestures
+index 7c7418e..6395bfd 100755
+--- a/libinput-gestures
++++ b/libinput-gestures
+@@ -4,7 +4,7 @@
+ import os, sys, argparse, subprocess, shlex, re, getpass, fcntl
+ from pathlib import Path
+ 
+-PROG = Path(sys.argv[0]).name
++PROG = "libinput-gestures"
+ 
+ # Conf file containing gesture commands.
+ # Search first for user file then system file.
+diff --git a/libinput-gestures-setup b/libinput-gestures-setup
+index 22be217..5dc000d 100755
+--- a/libinput-gestures-setup
++++ b/libinput-gestures-setup
+@@ -1,11 +1,11 @@
+-#!/bin/bash
++#!/usr/bin/env bash
+ # User setup script.
+ # (C) Mark Blakeney, markb@berlios.de, Aug 2016.
+ 
+-PROG="$(basename $0)"
++PROG="libinput-gestures-setup"
+ NAME=${PROG%-*}
+ 
+-BINDIR="/usr/bin"
++BINDIR="/bin"
+ APPDIR="/usr/share/applications"
+ ICOBAS="/usr/share/icons/hicolor"
+ ICODIR="$ICOBAS/128x128/apps"
+diff --git a/libinput-gestures.desktop b/libinput-gestures.desktop
+index 903c14c..13d71f3 100644
+--- a/libinput-gestures.desktop
++++ b/libinput-gestures.desktop
+@@ -2,7 +2,7 @@
+ Type=Application
+ Terminal=false
+ Name=Libinput Gestures
+-Exec=/usr/bin/libinput-gestures
++Exec=@out@/bin/libinput-gestures
+ Icon=libinput-gestures
+ Comment=Background application to intercept and action libinput gestures from touchpad.
+ Categories=GNOME;GTK;System;

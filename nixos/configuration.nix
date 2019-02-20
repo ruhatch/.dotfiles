@@ -36,6 +36,7 @@ in
     ];
 
   # Use the systemd-boot EFI boot loader.
+  boot.kernelParams = [ "i8042.reset" ];
   boot.loader.grub.device = "/dev/nvme0n1";
   boot.loader.timeout = 0;
   boot.loader.systemd-boot.enable = true;
@@ -55,39 +56,21 @@ in
     SKYC0FA5 = {
       psk = "XDSBVBXV";
     };
-    "WholeFoodsMarket" = {};
-    SHAW-D2AA40-5G = {
-      psk = "251151000198";
+    BTHub6-6JN5 = {
+      psk = "D6bNEwkwudLN";
     };
-    Spartacus = {
-      psk = "spartacus";
+    BTHub6-TPJ9 = {
+      psk = "bv3patMDdFLr";
     };
-    SG-User = {
-      psk = "suitegenius";
-    };
-    ShawOpen = {};
-    "GokiteCabarete.com" = {
-      psk = "MesaExtreme2511";
-    };
-    "Fresh Fresh cafe2" = {
-      psk = "eatfresh2";
-    };
-    "Co-cab wifi" = {
-      psk = "31498968";
-    };
-    "LAGUNA PARK 2" = {};
-    "LAGUNA PARK 3" = {};
-    "Vagamundo Coffee & Waffles" = {
-      psk = "espressobean";
-    };
-    Claro_1271 = {
-      psk = "KjjUvGx3py";
+    Resident = {
+      auth = ''
+        key_mgmt=WPA-EAP
+        eap=PEAP
+        identity="moneyandco"
+        password="Qu7WEpxPyUxgbYmp"
+      '';
     };
   };
-
-  networking.extraHosts = ''
-    192.168.56.101 local.moneyandco.com
-  '';
 
   # Select internationalisation properties.
   i18n = {
@@ -97,7 +80,7 @@ in
   };
 
   # Set your time zone.
-  time.timeZone = "America/Santo_Domingo";
+  time.timeZone = "Europe/London";
 
   nixpkgs.config.allowUnfree = true;
 
@@ -123,7 +106,6 @@ in
     firefox
     git
     git-crypt
-    git-lfs
     gnumake
     gnupg
     haskellPackages.brittany
@@ -137,19 +119,19 @@ in
     htop
     keepassx2
     keychain
+    libinput-gestures
     minecraft
     openssl
     openvpn
     pavucontrol
+    python3 # For floobits
     ripgrep
     rofi
     rxvt_unicode
     simplicity
     slock
     stack
-    taskwarrior
     texlive.combined.scheme-full
-    vit
     xdotool
     xorg.xbacklight
     zathura
@@ -190,7 +172,13 @@ in
     iptables -A nixos-fw -d 224.0.0.0/4 -j nixos-fw-accept
   '';
 
-  hardware.pulseaudio.enable = true;
+  hardware.bluetooth.enable = true;
+  hardware.pulseaudio = {
+    enable = true;
+    package = pkgs.pulseaudioFull;
+  };
+
+  services.logind.lidSwitch = "hibernate";
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
@@ -213,10 +201,9 @@ in
     windowManager.xmonad.enable = true;
     windowManager.xmonad.enableContribAndExtras = true;
     layout = "gb";
-    xkbOptions = "caps:super";
     libinput.enable = true;
     libinput.naturalScrolling = true;
-    # libinput.tapping = false;
+    libinput.tapping = false;
   };
 
   # Themes
@@ -263,47 +250,12 @@ in
 
   environment.variables.QT_AUTO_SCREEN_SCALE_FACTOR = "1";
 
-  # emacs
-  # services.emacs.enable = true;
-  # services.emacs.defaultEditor = true;
-
-  # Hibernate-after-suspend
-  systemd.services.hibernate-after-suspend = {
-    description = "Hibernate after suspend";
-    before = [ "suspend.target" ];
-    conflicts = [ "hibernate.target" "hybrid-suspend.target" ];
-    unitConfig = {
-     StopWhenUnneeded = "true";
-    };
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = "yes";
-      Environment = [ "\"ALARM_SEC=1800\"" "\"WAKEALARM=/sys/class/rtc/rtc0/wakealarm\"" ];
-      ExecStart = "-/run/current-system/sw/bin/rtcwake --seconds $ALARM_SEC --auto --mode no";
-      ExecStop = ''
-        -/bin/sh -c '\
-        ALARM=$(cat $WAKEALARM); \
-        NOW=$(date +%%s); \
-        if [ -z "$ALARM" ] || [ "$NOW" -ge "$ALARM" ]; then \
-            echo "hibernate-after-suspend: Woke up - no alarm set. Hibernating..."; \
-            systemctl hibernate; \
-        else \
-            echo "hibernate-after-suspend: Woke up before alarm - normal wakeup."; \
-            /run/current-system/sw/bin/rtcwake --auto --mode disable; \
-        fi \
-        '
-      '';
-    };
-    wantedBy = [ "sleep.target" ];
-    requiredBy = [ "suspend.target" ];
-  };
-
   systemd.user.services."libinput-gestures" = {
     description = "Add multitouch gestures using libinput-gestures";
     wantedBy = [ "default.target" ];
     serviceConfig.Restart = "always";
     serviceConfig.RestartSec = 2;
-    serviceConfig.ExecStart = "${libinput-gestures}/bin/libinput-gestures";
+    serviceConfig.ExecStart = "${pkgs.libinput-gestures}/bin/libinput-gestures";
     environment = { DISPLAY = ":0"; };
   };
 
@@ -321,7 +273,7 @@ in
     clock = "slock";
   };
 
-  virtualisation.virtualbox.host.enable = true;
+  # virtualisation.virtualbox.host.enable = true;
 
   # nix.useSandbox = true;
 
@@ -353,16 +305,6 @@ in
   };
 
   nix.nixPath = [
-    # (let
-    #   sshConfigFile =
-    #     pkgs.writeText "ssh_config" ''
-    #       Host github.com
-    #       IdentityFile /etc/ssh/mandco_rsa_key
-    #       StrictHostKeyChecking=no
-    #     '';
-    # in
-    #   "ssh-config-file=${sshConfigFile}"
-    # )
     "ssh-config-file=/etc/git-ssh-config"
     "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos/nixpkgs"
     "nixos-config=/etc/nixos/configuration.nix"
