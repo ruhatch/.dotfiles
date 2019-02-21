@@ -8,7 +8,7 @@ let
 
   inherit (pkgs) lib callPackage stdenv fetchFromGitHub;
 
-  libinput-gestures = callPackage ./libinput-gestures.nix {};
+  # libinput-gestures = callPackage ./libinput-gestures.nix {};
 
   simplicity = stdenv.mkDerivation rec {
     name = "simplicity";
@@ -119,7 +119,7 @@ in
     htop
     keepassx2
     keychain
-    libinput-gestures
+    # libinput-gestures
     minecraft
     openssl
     openvpn
