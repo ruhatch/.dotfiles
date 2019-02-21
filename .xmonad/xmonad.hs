@@ -18,9 +18,7 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.Place
 import XMonad.Hooks.SetWMName
 import XMonad.Layout.Fullscreen
-import XMonad.Layout.Gaps
 import XMonad.Layout.IndependentScreens
-import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
 import qualified XMonad.StackSet as W
 import XMonad.Util.Cursor
@@ -62,6 +60,7 @@ myWorkspaces :: [String]
 myWorkspaces = clickable workspaceLabels
  where
   clickable l =
+
     [ "<action=xdotool key super+"
         ++ show i
         ++ " button=1>"
@@ -120,13 +119,11 @@ myManageHook = manageSpawn <+> composeAll
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 
-myLayout = myGaps (Tall 1 (3 / 100) (1 / 2))
-  ||| noBorders (fullscreenFull Full)
+myLayout = avoidStruts (mySpacing (Tall 1 (3 / 100) (1 / 2)))
+  ||| fullscreenFull Full
  where
-  mySpacing =
-    spacingRaw True (Border 0 0 0 0) False (Border 15 15 15 15) True
-  myGaps = smartBorders . avoidStruts . mySpacing . gaps
-    [(U, 15), (D, 15), (R, 15), (L, 15)]
+  mySpacing = spacingRaw False (Border 8 8 8 8) True (Border 0 0 0 0) False .
+    spacingRaw True (Border 8 8 8 8) False (Border 8 8 8 8) True
 
 ------------------------------------------------------------------------
 -- Colors and borders
@@ -143,7 +140,7 @@ xmobarCurrentWorkspaceColor = "#Af745f"
 
 -- Width of the window border in pixels.
 myBorderWidth :: Dimension
-myBorderWidth = 8
+myBorderWidth = 0
 
 
 ------------------------------------------------------------------------
