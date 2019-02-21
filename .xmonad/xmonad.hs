@@ -1,29 +1,32 @@
-import           Data.Maybe
-import           Graphics.X11.ExtraTypes
-import           System.Exit
-import           System.IO
---import ViewDoc
-import qualified Data.Map                         as M
-import           XMonad
-import           XMonad.Actions.CycleWS
-import           XMonad.Actions.SpawnOn
-import           XMonad.Hooks.DynamicLog
-import qualified XMonad.Hooks.EwmhDesktops        as E
-import           XMonad.Hooks.FadeInactive
-import           XMonad.Hooks.ManageDocks
-import           XMonad.Hooks.ManageHelpers
-import           XMonad.Hooks.Place
-import           XMonad.Hooks.SetWMName
-import           XMonad.Layout.Fullscreen
-import           XMonad.Layout.Gaps
-import           XMonad.Layout.IndependentScreens
-import           XMonad.Layout.NoBorders
-import           XMonad.Layout.Spacing
-import qualified XMonad.StackSet                  as W
-import           XMonad.Util.Cursor
-import           XMonad.Util.EZConfig             (additionalKeys)
-import           XMonad.Util.Run                  (spawnPipe)
-import           XMonad.Util.WorkspaceCompare
+{-# LANGUAGE NamedFieldPuns      #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
+import qualified Data.Map as M
+import Data.Maybe
+import Graphics.X11.ExtraTypes
+import System.Exit
+import System.IO
+
+import XMonad
+import XMonad.Actions.CycleWS
+import XMonad.Actions.SpawnOn
+import XMonad.Hooks.DynamicLog
+import qualified XMonad.Hooks.EwmhDesktops as E
+import XMonad.Hooks.FadeInactive
+import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.Place
+import XMonad.Hooks.SetWMName
+import XMonad.Layout.Fullscreen
+import XMonad.Layout.Gaps
+import XMonad.Layout.IndependentScreens
+import XMonad.Layout.NoBorders
+import XMonad.Layout.Spacing
+import qualified XMonad.StackSet as W
+import XMonad.Util.Cursor
+import XMonad.Util.Run (spawnPipe)
+import XMonad.Util.WorkspaceCompare
+
 
 ------------------------------------------------------------------------
 -- Terminal
@@ -56,7 +59,7 @@ myLauncher = "rofi -show run"
 -- The default number of workspaces (virtual screens) and their names.
 
 myWorkspaces :: [String]
-myWorkspaces = clickable workspaces
+myWorkspaces = clickable workspaceLabels
  where
   clickable l =
     [ "<action=xdotool key super+"
@@ -64,9 +67,9 @@ myWorkspaces = clickable workspaces
         ++ " button=1>"
         ++ ws
         ++ "</action>"
-    | (i, ws) <- zip ([1 .. 9] ++ [0]) l
+    | (i, ws) <- zip ([1 .. 9] ++ [0 :: Int]) l
     ]
-  workspaces = zipWith makeLabel [1 .. 10] icons
+  workspaceLabels = zipWith makeLabel [1 .. 10 :: Int] icons
   makeLabel index icon = show index ++ ":<fn=1>" ++ icon : "</fn>"
   icons =
     [ '\xf269'
@@ -95,6 +98,7 @@ myWorkspaces = clickable workspaces
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 
+myManageHook :: ManageHook
 myManageHook = manageSpawn <+> composeAll
   [ isDialog --> placeHook (fixed (0.5, 0.5))
   , className =? "Spotify" --> doShift (myWorkspaces !! 9)
@@ -119,28 +123,26 @@ myManageHook = manageSpawn <+> composeAll
 myLayout = myGaps (Tall 1 (3 / 100) (1 / 2))
   ||| noBorders (fullscreenFull Full)
  where
-  myGaps = lessBorders OnlyFloat . avoidStruts . spacing 15 . gaps
+  mySpacing =
+    spacingRaw True (Border 0 0 0 0) False (Border 15 15 15 15) True
+  myGaps = smartBorders . avoidStruts . mySpacing . gaps
     [(U, 15), (D, 15), (R, 15), (L, 15)]
 
 ------------------------------------------------------------------------
 -- Colors and borders
 
---myNormalBorderColor  = "#AD795B"
---myNormalBorderColor  = "#D39A78"
+myNormalBorderColor :: String
 myNormalBorderColor = "#FAFAFA"
---myNormalBorderColor = "#B8CDD4"
---myNormalBorderColor = "#9aebf9"
+
+myFocusedBorderColor :: String
 myFocusedBorderColor = myNormalBorderColor
 
--- Color of current window title in xmobar.
-xmobarTitleColor = "#FFB6B0"
-
 -- Color of current workspace in xmobar.
+xmobarCurrentWorkspaceColor :: String
 xmobarCurrentWorkspaceColor = "#Af745f"
---xmobarCurrentWorkspaceColor = "#58EBED"
 
 -- Width of the window border in pixels.
---myBorderWidth = 8
+myBorderWidth :: Dimension
 myBorderWidth = 8
 
 
@@ -159,7 +161,7 @@ mySink :: String
 mySink = "alsa_output.pci-0000_00_1f.3.analog-stereo"
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf@XConfig { XMonad.modMask = modMask } =
+myKeys conf@XConfig { modMask } =
   M.fromList
     $ [
 
@@ -168,11 +170,11 @@ myKeys conf@XConfig { XMonad.modMask = modMask } =
       ,
 
     -- Lock the screen using command specified by myScreensaver
-        ((modMask .|. controlMask, xK_l)              , spawn myScreensaver)
+        ((modMask .|. controlMask, xK_l), spawn myScreensaver)
       ,
 
     -- Spawn the launcher using command specified by myLauncher
-        ((modMask, xK_space)                          , spawn myLauncher)
+        ((modMask, xK_space)          , spawn myLauncher)
       ,
 
     -- Take a selective screenshot using the command specified by mySelectScreenshot
@@ -228,11 +230,11 @@ myKeys conf@XConfig { XMonad.modMask = modMask } =
       ,
 
     -- Audio next
-        ((0, xF86XK_AudioNext)                       , spawn "playerctl next")
+        ((0, xF86XK_AudioNext), spawn "playerctl next")
       ,
 
     -- Move to the next open workspace
-        ((modMask .|. shiftMask, xK_Tab)             , moveToNextNonEmptyNoWrap)
+        ((modMask .|. shiftMask, xK_Tab), moveToNextNonEmptyNoWrap)
       ,
 
     -- Move to the previous open workspace
@@ -240,8 +242,8 @@ myKeys conf@XConfig { XMonad.modMask = modMask } =
       ,
 
     -- Move to the next empty workspace
-        ((modMask, xK_e)                             , moveTo Next EmptyWS)
-      , ((modMask .|. mod1Mask, xK_w)                , toggleHDMI)
+        ((modMask, xK_e), moveTo Next EmptyWS)
+      , ((modMask .|. mod1Mask, xK_w), toggleHDMI)
       ,
 
     -- Bindings for xmonad-session
@@ -254,11 +256,11 @@ myKeys conf@XConfig { XMonad.modMask = modMask } =
   --
 
     -- Close focused window
-        ((modMask .|. shiftMask, xK_w)               , kill)
+        ((modMask .|. shiftMask, xK_w), kill)
       ,
 
     -- Cycle through the available layout algorithms
-        ((modMask, xK_Right)                         , sendMessage NextLayout)
+        ((modMask, xK_Right), sendMessage NextLayout)
       ,
 
     --  Reset the layouts on the current workspace to default
@@ -266,43 +268,43 @@ myKeys conf@XConfig { XMonad.modMask = modMask } =
       ,
 
     -- Resize viewed windows to the correct size
-        ((modMask, xK_n)                             , refresh)
+        ((modMask, xK_n)      , refresh)
       ,
 
     -- Move focus to the next window
-        ((modMask, xK_Tab)                           , windows W.focusDown)
+        ((modMask, xK_Tab), windows W.focusDown)
       ,
 
     -- Move focus to the next window
-        ((modMask, xK_j)                             , windows W.focusDown)
+        ((modMask, xK_j), windows W.focusDown)
       ,
 
     -- Move focus to the previous window
-        ((modMask, xK_k)                             , windows W.focusUp)
+        ((modMask, xK_k), windows W.focusUp)
       ,
 
     -- Move focus to the master window
-        ((modMask, xK_m)                             , windows W.focusMaster)
+        ((modMask, xK_m), windows W.focusMaster)
       ,
 
     -- Swap the focused window and the master window
-        ((modMask .|. shiftMask, xK_Return)          , windows W.swapMaster)
+        ((modMask .|. shiftMask, xK_Return), windows W.swapMaster)
       ,
 
     -- Swap the focused window with the next window
-        ((modMask .|. shiftMask, xK_j)               , windows W.swapDown)
+        ((modMask .|. shiftMask, xK_j), windows W.swapDown)
       ,
 
     -- Swap the focused window with the previous window
-        ((modMask .|. shiftMask, xK_k)               , windows W.swapUp)
+        ((modMask .|. shiftMask, xK_k), windows W.swapUp)
       ,
 
     -- Shrink the master area
-        ((modMask, xK_h)                             , sendMessage Shrink)
+        ((modMask, xK_h), sendMessage Shrink)
       ,
 
     -- Expand the master area
-        ((modMask, xK_l)                             , sendMessage Expand)
+        ((modMask, xK_l), sendMessage Expand)
       ,
 
     -- Push window back into tiling
@@ -318,11 +320,11 @@ myKeys conf@XConfig { XMonad.modMask = modMask } =
       ,
 
     -- Quit xmonad
-        ((modMask .|. shiftMask, xK_q)               , io exitSuccess)
+        ((modMask .|. shiftMask, xK_q), io exitSuccess)
       ,
 
     -- Restart xmonad
-        ((modMask, xK_q)                             , restart "xmonad" True)
+        ((modMask, xK_q), restart "xmonad" True)
       ]
     ++
 
@@ -340,19 +342,25 @@ compareToCurrent = do
   let cur = W.workspace (W.current ws)
   return $ comp (W.tag cur) . W.tag
 
+greaterNonEmptyWs :: X (WindowSpace -> Bool)
 greaterNonEmptyWs = do
   comp <- compareToCurrent
   return (\w -> comp w == LT && isJust (W.stack w))
 
+lessNonEmptyWs :: X (WindowSpace -> Bool)
 lessNonEmptyWs = do
   comp <- compareToCurrent
   return (\w -> comp w == GT && isJust (W.stack w))
 
+moveToNextNonEmptyNoWrap :: X ()
 moveToNextNonEmptyNoWrap = moveTo Next (WSIs greaterNonEmptyWs)
+
+moveToPrevNonEmptyNoWrap :: X ()
 moveToPrevNonEmptyNoWrap = moveTo Prev (WSIs lessNonEmptyWs)
 
+toggleHDMI :: X ()
 toggleHDMI = do
-  count <- countScreens
+  (count :: Int) <- countScreens
   spawn $ "echo " ++ show count ++ " >> ~/test.txt"
   if count > 1
     then spawn "xrandr --output HDMI1 --off"
@@ -367,7 +375,8 @@ toggleHDMI = do
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
 
-myMouseBindings XConfig { XMonad.modMask = modMask } = M.fromList
+myMouseBindings :: XConfig Layout -> M.Map (KeyMask, Button) (Window -> X ())
+myMouseBindings XConfig { modMask } = M.fromList
   [
     -- Set the window to floating mode and move by dragging
     ((modMask, button1), \w -> focus w >> mouseMoveWindow w)
@@ -387,12 +396,13 @@ myMouseBindings XConfig { XMonad.modMask = modMask } = M.fromList
 -- with mod-q.  Used by, e.g., XMonad.Layout.PerWorkspace to initialize
 -- per-workspace layout choices.
 
-spawnSingleton :: String -> X ()
-spawnSingleton cmd = flip whenX (spawn cmd) $ do
-  ws <- gets windowset
-  let ws' = W.allWindows ws
-  pure True
+-- spawnSingleton :: String -> X ()
+-- spawnSingleton cmd = flip whenX (spawn cmd) $ do
+--   ws <- gets windowset
+--   let ws' = W.allWindows ws
+--   pure True
 
+myStartupHook :: X ()
 myStartupHook =
   spawn
       "compton --backend glx --xrender-sync --xrender-sync-fence -fcCz -l -17 -t -17"
@@ -407,6 +417,7 @@ myStartupHook =
 -----------------------------------------------------------------------
 -- Log hook
 
+myLogHook :: Handle -> X ()
 myLogHook xmproc = do
   fadeInactiveLogHook 0.5
   dynamicLogWithPP $ xmobarPP
@@ -420,6 +431,7 @@ myLogHook xmproc = do
 ------------------------------------------------------------------------
 -- Run xmonad with all the defaults we set up.
 
+main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar -d ~/.xmonad/xmobar.hs"
   xmonad . docks . E.ewmh $ defaults { logHook = myLogHook xmproc }
@@ -432,23 +444,24 @@ main = do
 --
 -- No need to modify this.
 
-defaults = def {
+defaults = def
+  {
     -- simple stuff
-                 terminal           = myTerminal
-               , focusFollowsMouse  = myFocusFollowsMouse
-               , borderWidth        = myBorderWidth
-               , modMask            = myModMask
-               , workspaces         = myWorkspaces
-               , normalBorderColor  = myNormalBorderColor
-               , focusedBorderColor = myFocusedBorderColor
+    terminal      = myTerminal
+  , focusFollowsMouse = myFocusFollowsMouse
+  , borderWidth   = myBorderWidth
+  , modMask       = myModMask
+  , workspaces    = myWorkspaces
+  , normalBorderColor = myNormalBorderColor
+  , focusedBorderColor = myFocusedBorderColor
 
     -- key bindings
-               , keys               = myKeys
-               , mouseBindings      = myMouseBindings
+  , keys          = myKeys
+  , mouseBindings = myMouseBindings
 
     -- hooks, layouts
-               , layoutHook         = myLayout
-               , manageHook         = myManageHook
-               , startupHook        = myStartupHook
-               , handleEventHook    = E.fullscreenEventHook
-               }
+  , layoutHook    = myLayout
+  , manageHook    = myManageHook
+  , startupHook   = myStartupHook
+  , handleEventHook = E.fullscreenEventHook
+  }

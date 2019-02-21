@@ -1,17 +1,13 @@
-resolver: ghc-8.0.2
+resolver: lts-12.26
 
 packages:
   - .
 
 nix:
   enable: true
+  pure: true
   shell-file: shell.nix
-  nix-shell-options: ["--argstr", "compiler", "ghc802"]
 
-# extra-deps:
-#   - X11-1.8
-#   - X11-xft-0.3.1
-#   - directory-1.2.7.1
-#   - xmobar-0.24.3
-#   - xmonad-0.13
-#   - xmonad-contrib-0.13
+extra-deps:
+  - xmonad-0.15
+  - xmonad-contrib-0.15
