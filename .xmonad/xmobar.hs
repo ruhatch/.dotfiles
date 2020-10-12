@@ -3,15 +3,11 @@
 -- http://github.com/vicfryzel/xmonad-config
 
 Config {
-    -- font = "xft:SFNS Display:size=11",
     font = "xft:Fira Code Retina:size=12",
-    additionalFonts = ["xft:FontAwesome:size=11"],
-    alpha = 0,
-    --bgColor = "#575757",
-    --fgColor = "#dcdccc",
-    bgColor = "#2f343f",
-    fgColor = "#2f343f",
-    --fgColor = "#afb8c5",
+    additionalFonts = ["xft:Font Awesome 5 Free Solid:size=10", "xft:Font Awesome 5 Brands:size=10"],
+    alpha = 200,
+    bgColor = "#424242",
+    fgColor = "#E0E0E0",
     position = TopSize C 100 24,
     lowerOnStart = True,
     commands = [
@@ -33,22 +29,25 @@ Config {
         "--on-icon-pattern", "<fn=1>\xf0e7</fn>",
         "--idle-icon-pattern", "<fn=1>\xf0e7</fn>"
       ] 50,
-      Run Date "%a %_d %b %H:%M" "date" 10,
+      -- Run Date "%a %_d %b %H:%M" "date" 10,
+      Run Date "<action=`show-clock` button=1><fn=1>\xf073</fn> %a %_d %b</action>" "date" 10,
       Run UnsafeStdinReader,
       Run Volume "default" "Master" [
         "-t", "<status> <volume>%",
         "--",
         "-o", "<fn=1>\xf026</fn>",
         "-O", "<fn=1>\xf028</fn>",
-        "-c", "#2f343f",
-        "-C", "#2f343f"
+        "-c", "#E0E0E0",
+        "-C", "#E0E0E0"
       ] 10,
       Run Wireless "wlp2s0" [
-        "-t", "<fn=1>\xf1eb</fn> <essid>",
+        "-t", "<action=`sudo -A systemctl restart wpa_supplicant.service` button=1><fn=1>\xf1eb</fn> <essid></action>",
         "-x", "Not Connected"
-      ] 10
+      ] 10,
+      Run UnsafeXPropertyLog "focus",
+      Run UnsafeXPropertyLog "pom-timer"
     ],
     sepChar = "%",
     alignSep = "}{",
-    template = " %UnsafeStdinReader% } %date% { %wlp2s0wi%  %default:Master%  %battery%  <action=`oblogout` button=1><fn=1><raw=1:/></fn></action> "
+    template = " %UnsafeStdinReader% } %date%  |  <action=`focus What\'s your new focus?` button=1><fn=1><raw=1:/></fn> %focus%</action>  |  <fn=1><raw=1:/></fn> %pom-timer%{ %wlp2s0wi%  %default:Master%  %battery%  <action=`oblogout` button=1><fn=1><raw=1:/></fn></action> "
 }

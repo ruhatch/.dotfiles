@@ -1,8 +1,9 @@
-{-# LANGUAGE NamedFieldPuns      #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 import qualified Data.Map as M
-import Data.Maybe
 import Graphics.X11.ExtraTypes
 import System.Exit
 import System.IO
@@ -21,9 +22,8 @@ import XMonad.Layout.Fullscreen
 import XMonad.Layout.IndependentScreens
 import XMonad.Layout.Spacing
 import qualified XMonad.StackSet as W
-import XMonad.Util.Cursor
 import XMonad.Util.Run (spawnPipe)
-import XMonad.Util.WorkspaceCompare
+import XMonad.Util.SpawnOnce (spawnOnOnce)
 
 
 ------------------------------------------------------------------------
@@ -69,18 +69,18 @@ myWorkspaces = clickable workspaceLabels
     | (i, ws) <- zip ([1 .. 9] ++ [0 :: Int]) l
     ]
   workspaceLabels = zipWith makeLabel [1 .. 10 :: Int] icons
-  makeLabel index icon = show index ++ ":<fn=1>" ++ icon : "</fn>"
+  makeLabel index (fontIndex, icon) = show index ++ ":<fn=" ++ show fontIndex ++ ">" ++ icon : "</fn>"
   icons =
-    [ '\xf269'
-    , '\xf120'
-    , '\xf121'
-    , '\xf128'
-    , '\xf128'
-    , '\xf128'
-    , '\xf128'
-    , '\xf128'
-    , '\xf1b6'
-    , '\xf1bc'
+    [ (2, '\xf269')
+    , (1, '\xf120')
+    , (1, '\xf121')
+    , (1, '\xf03d')
+    , (1, '\xf128')
+    , (1, '\xf128')
+    , (1, '\xf128')
+    , (1, '\xf128')
+    , (2, '\xf1b6')
+    , (2, '\xf1bc')
     ]
 
 -----------------------------------------------------------------------
@@ -104,8 +104,10 @@ myManageHook = manageSpawn <+> composeAll
   , resource =? "desktop_window" --> doIgnore
   , className =? "Gimp" --> doFloat
   , className =? "Oblogout" --> doFloat
-  , className =? "Vlc" --> doShift (myWorkspaces !! 8)
-  , className =? "Zeal" --> doFloat
+  , className =? "vlc" --> doShift (myWorkspaces !! 8)
+  , className =? "Steam" --> doShift (myWorkspaces !! 8)
+  , className =? "Gxmessage" --> doFloat
+  , className =? "XClock" --> placeHook (underMouse (0.5, -0.3)) <+> doFloat
   , isFullscreen --> (doF W.focusDown <+> doFullFloat)
   ]
 
@@ -120,10 +122,11 @@ myManageHook = manageSpawn <+> composeAll
 -- which denotes layout choice.
 
 myLayout = avoidStruts (mySpacing (Tall 1 (3 / 100) (1 / 2)))
+  ||| avoidStruts (fullscreenFull Full)
   ||| fullscreenFull Full
  where
-  mySpacing = spacingRaw False (Border 8 8 8 8) True (Border 0 0 0 0) False .
-    spacingRaw True (Border 8 8 8 8) False (Border 8 8 8 8) True
+  mySpacing = spacingRaw False (Border 20 20 20 20) True (Border 0 0 0 0) False .
+    spacingRaw True (Border 20 20 20 20) False (Border 20 20 20 20) True
 
 ------------------------------------------------------------------------
 -- Colors and borders
@@ -211,11 +214,11 @@ myKeys conf@XConfig { modMask } =
       ,
 
     -- Decrease brightness
-        ((0, xF86XK_MonBrightnessDown), spawn "xbacklight -dec 10")
+        ((0, xF86XK_MonBrightnessDown), spawn "light -U 10")
       ,
 
     -- Increase brightness
-        ((0, xF86XK_MonBrightnessUp), spawn "xbacklight -inc 10")
+        ((0, xF86XK_MonBrightnessUp), spawn "light -A 10")
       ,
 
     -- Audio previous
@@ -231,11 +234,11 @@ myKeys conf@XConfig { modMask } =
       ,
 
     -- Move to the next open workspace
-        ((modMask .|. shiftMask, xK_Tab), moveToNextNonEmptyNoWrap)
+        ((modMask .|. shiftMask, xK_Tab), moveTo Next NonEmptyWS)
       ,
 
     -- Move to the previous open workspace
-        ((modMask .|. shiftMask .|. mod1Mask, xK_Tab), moveToPrevNonEmptyNoWrap)
+        ((modMask .|. shiftMask .|. mod1Mask, xK_Tab), moveTo Prev NonEmptyWS)
       ,
 
     -- Move to the next empty workspace
@@ -317,11 +320,11 @@ myKeys conf@XConfig { modMask } =
       ,
 
     -- Quit xmonad
-        ((modMask .|. shiftMask, xK_q), io exitSuccess)
+        ((modMask .|. shiftMask, xK_x), io exitSuccess)
       ,
 
     -- Restart xmonad
-        ((modMask, xK_q), restart "xmonad" True)
+        ((modMask, xK_x), restart "xmonad" True)
       ]
     ++
 
@@ -331,29 +334,6 @@ myKeys conf@XConfig { modMask } =
        | (i, k) <- zip (XMonad.workspaces conf) ([xK_1 .. xK_9] ++ [xK_0])
        , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]
        ]
-
-compareToCurrent :: X (WindowSpace -> Ordering)
-compareToCurrent = do
-  comp <- getWsCompare
-  ws   <- gets windowset
-  let cur = W.workspace (W.current ws)
-  return $ comp (W.tag cur) . W.tag
-
-greaterNonEmptyWs :: X (WindowSpace -> Bool)
-greaterNonEmptyWs = do
-  comp <- compareToCurrent
-  return (\w -> comp w == LT && isJust (W.stack w))
-
-lessNonEmptyWs :: X (WindowSpace -> Bool)
-lessNonEmptyWs = do
-  comp <- compareToCurrent
-  return (\w -> comp w == GT && isJust (W.stack w))
-
-moveToNextNonEmptyNoWrap :: X ()
-moveToNextNonEmptyNoWrap = moveTo Next (WSIs greaterNonEmptyWs)
-
-moveToPrevNonEmptyNoWrap :: X ()
-moveToPrevNonEmptyNoWrap = moveTo Prev (WSIs lessNonEmptyWs)
 
 toggleHDMI :: X ()
 toggleHDMI = do
@@ -393,23 +373,16 @@ myMouseBindings XConfig { modMask } = M.fromList
 -- with mod-q.  Used by, e.g., XMonad.Layout.PerWorkspace to initialize
 -- per-workspace layout choices.
 
--- spawnSingleton :: String -> X ()
--- spawnSingleton cmd = flip whenX (spawn cmd) $ do
---   ws <- gets windowset
---   let ws' = W.allWindows ws
---   pure True
-
 myStartupHook :: X ()
 myStartupHook =
-  spawn
-      "compton --backend glx --xrender-sync --xrender-sync-fence -fcCz -l -17 -t -17"
-    <+> setDefaultCursor xC_left_ptr
-    <+> spawn "hsetroot -solid '#D6D6D6'"
-    <+> spawn "xsetroot -cursor_name left_ptr"
+  spawn "xsetroot -cursor_name left_ptr"
     <+> spawn "xrandr --output HDMI1 --off"
     <+> spawn "xrandr --output HDMI1 --auto --right-of eDP1"
     <+> setWMName "LG3D"
-    <+> spawn "firefox"
+    <+> spawn "xssproxy"
+    <+> spawn "xprop -root -f focus 8s -set focus \"What's your new focus?\""
+    <+> spawn "xprop -root -f pom-timer 8s -set pom-timer \"<action=\\`pom start\\` button=1>Start a pomodoro</action>\""
+    <+> spawnOnOnce (myWorkspaces !! 0) "firefox"
 
 -----------------------------------------------------------------------
 -- Log hook
